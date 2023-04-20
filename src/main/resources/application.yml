@@ -1,0 +1,13 @@
+cloud:
+  aws:
+    credentials:
+      access-key: AKIA6PFTNSRPOGAIRF4U
+      secret-key: 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
+    region:
+      static: us-east-1
+    stack:
+      auto: false
+
+application:
+  bucket:
+    name: s3-upload-and-download
