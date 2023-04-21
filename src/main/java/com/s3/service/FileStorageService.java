@@ -5,6 +5,9 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +18,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -60,5 +65,22 @@ public class FileStorageService {
             log.error("Error converting Multipart File to File "+e);
         }
         return convertedFile;
+    }
+
+    public String convertCsvToJson(String bucketName, String fileName) throws IOException {
+        S3Object s3Object = s3Client.getObject(bucketName, fileName);
+        byte[] fileContent;
+        try {
+            fileContent = IOUtils.toByteArray(s3Object.getObjectContent());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        CsvMapper csvMapper = new CsvMapper();
+        CsvSchema csvSchema = CsvSchema.emptySchema().withHeader();
+        List<Object> objects = csvMapper.readerFor(Map.class).with(csvSchema).readValues(fileContent).readAll();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonString = objectMapper.writeValueAsString(objects);
+
+        return jsonString;
     }
 }

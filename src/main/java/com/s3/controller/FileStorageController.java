@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RestController
 public class FileStorageController {
 
@@ -32,4 +34,10 @@ public class FileStorageController {
                 .header("Content-disposition","attachment; filemame\""+fileName+"\"")
                 .body(byteArrayResource);
     }
+
+    @GetMapping("/convert-csv-to-json/{bucketName}/{fileName}")
+    public ResponseEntity<String> convertCsvToJson(@PathVariable String bucketName, @PathVariable String fileName) throws IOException {
+        return new ResponseEntity<>(service.convertCsvToJson(bucketName,fileName),HttpStatus.OK);
+    }
+
 }
